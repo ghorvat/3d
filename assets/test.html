@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>three.js webgl - io - OBJ converter</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+
+<body>
+<div id="container"></div>
+
+
+<script src="../three.js"></script>
+<script src="../TrackballControls.js"></script>
+
+
+<script>
+
+    var SCREEN_WIDTH = window.innerWidth;
+    var SCREEN_HEIGHT = window.innerHeight;
+    var container, stats;
+
+    var camera, scene;
+    var canvasRenderer, webglRenderer;
+
+    var mesh, zmesh, geometry,controls;
+
+    var mouseX = 0, mouseY = 0;
+
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+
+    var render_gl = 1;
+    var has_gl = 0;
+
+    init();
+    animate();
+
+
+    function init() {
+
+        container = document.getElementById( 'container' );
+        camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 1000 );
+        camera.position.z = 100;
+        scene = new THREE.Scene();
+
+        // LIGHTS
+
+  pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(200, 0, 0); //from right
+  scene.add(pointLight);
+
+  pointLight2 = new THREE.PointLight(0xffffff, 0.6);
+  pointLight2.position.set(0, -50, 0); //from bottom
+  scene.add(pointLight2);
+
+  pointLight3 = new THREE.PointLight(0xffffff, 0.6);
+  pointLight3.position.set(0, 0, 50); //from front
+  scene.add(pointLight3);
+
+  pointLight4 = new THREE.PointLight(0xffffff, 0.6);
+  pointLight4.position.set(0, 0, -50); //from back
+  scene.add(pointLight4);
+
+  pointLight5 = new THREE.PointLight(0xffffff, 1);
+  pointLight5.position.set(0, 50, 0); //from top
+  scene.add(pointLight5);
+
+  pointLight6 = new THREE.PointLight(0xffffff, 1);
+  pointLight6.position.set(-50, 0, 0); //from left
+  scene.add(pointLight6);
+
+  ambLight = new THREE.AmbientLight(0xffffff, 1);
+
+
+        // RENDERER
+
+        if ( render_gl ) {
+
+            try {
+
+                webglRenderer = new THREE.WebGLRenderer();
+                webglRenderer.setClearColor( 0xffffff );
+                webglRenderer.setPixelRatio( window.devicePixelRatio );
+                webglRenderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+                webglRenderer.domElement.style.position = "relative";
+
+                container.appendChild( webglRenderer.domElement );
+
+                has_gl = 1;
+
+            }
+            catch (e) {
+            }
+
+        }
+
+        controls = new THREE.TrackballControls( camera );
+        controls.rotateSpeed = 10;
+        controls.panSpeed = 10;
+        controls.noZoom = true;
+        controls.noPan = false;
+        controls.staticMoving = true;
+        controls.dynamicDampingFactor = 0.3;
+        controls.addEventListener( 'change', render );
+
+
+        var loader = new THREE.JSONLoader();
+        var shoes = function ( geometry, materials ) { createScene( geometry, materials ) };
+
+        loader.load( "outfile3.js", shoes );
+        window.addEventListener( 'resize', onWindowResize, false );
+
+    }
+
+    function onWindowResize() {
+
+        windowHalfX = window.innerWidth / 2;
+        windowHalfY = window.innerHeight / 2;
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        if ( webglRenderer ) webglRenderer.setSize( window.innerWidth, window.innerHeight );
+
+    }
+
+    function createScene( geometry, materials) {
+
+        zmesh = new THREE.Mesh( geometry, materials );
+        geometry.center();
+        zmesh.scale.set( 8, 8, 8 );
+        scene.add( zmesh );
+    }
+
+    function animate() {
+        requestAnimationFrame( animate );
+        controls.update();
+        render();
+    }
+
+    function render() {
+        if ( render_gl && has_gl ) webglRenderer.render( scene, camera );
+    }
+</script>
+
+</body>
+</html>
